@@ -32,7 +32,7 @@ public class RobotContainer {
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
   public static final Drivetrain drivetrain = new Drivetrain();
   
-  private final XboxController joystick = new XboxController(0);
+  private static final XboxController joystick = new XboxController(0);
 
   public final static CANCoder frontLeftEncoder = new CANCoder(0);
   public final static CANCoder frontRightEncoder = new CANCoder(3);
@@ -82,5 +82,9 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     // An ExampleCommand will run in autonomous
     return m_autoCommand;
+  }
+
+  public static XboxController getJoystick(){
+    return joystick;
   }
 }
