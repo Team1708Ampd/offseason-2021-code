@@ -4,15 +4,24 @@
 
 package frc.robot.subsystems;
 
+import java.io.BufferedWriter;
+
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.sensors.CANCoder;
 
+
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
 import frc.robot.RobotContainer;
+import edu.wpi.first.wpilibj.controller.PIDController;
 
 public class Drivetrain extends SubsystemBase {
+
+  public static PIDController pid = new PIDController(1,0,0);
+
+  BufferedWriter writer = new BufferedWriter(new FileWriter(pid.txt));
+
   public static CANCoder frontLeftEncoder = new CANCoder(0);
   public static CANCoder frontRightEncoder = new CANCoder(3);
   public static CANCoder backLeftEncoder = new CANCoder(1);
@@ -29,14 +38,26 @@ public class Drivetrain extends SubsystemBase {
 
   public TalonFX backRightDrive = new TalonFX(7);
   public TalonFX backRightAngle = new TalonFX(6);
+
   /** Creates a new Drivetrain. */
   public Drivetrain() {}
+  
 
 /**
  * Sets the wheels to either 0 or 180 so we can drive in forward/reverse
  * @param angleMotor - TalonFX passed in for the wheel we are currently resetting
  * @param encoder - angle of the wheel we are resetting
  */
+
+  public void pidDrive(){
+    pid.setSetpoint(180);
+    if(!pid.atSetpoint()){
+    RobotContainer.frontLeftAngle.set(ControlMode.PercentOutput, pid.calculate(RobotContainer.frontLeftEncoder.getAbsolutePosition(), 180));
+    }else{
+      RobotContainer.frontLeftAngle.set(ControlMode.PercentOutput, 0);
+    }
+  }
+
 
   public void resetWheel(){
     double angle = frontLeftEncoder.getAbsolutePosition();
