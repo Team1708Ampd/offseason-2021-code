@@ -9,6 +9,8 @@ import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.sensors.CANCoder;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Robot;
+import frc.robot.RobotContainer;
 
 public class Drivetrain extends SubsystemBase {
   public static CANCoder frontLeftEncoder = new CANCoder(0);
@@ -36,22 +38,25 @@ public class Drivetrain extends SubsystemBase {
  * @param encoder - angle of the wheel we are resetting
  */
 
-  public void resetWheels(TalonFX angleMotor, CANCoder encoder){
-    double angle = encoder.getAbsolutePosition();
+  public void resetWheel(){
+    double angle = frontLeftEncoder.getAbsolutePosition();
+    frontRightAngle.set(ControlMode.Follower, 4);
+    backLeftAngle.set(ControlMode.Follower, 4);
+    backRightAngle.set(ControlMode.Follower, 4);
+    
     if(angle < 180){
-      angleMotor.set(ControlMode.PercentOutput, .3);
+      frontLeftAngle.set(ControlMode.PercentOutput, .3);
       if(angle < 90)
-        angleMotor.set(ControlMode.PercentOutput, .2);
+        frontLeftAngle.set(ControlMode.PercentOutput, .2);
       if(angle < 45)
-        angleMotor.set(ControlMode.PercentOutput, .08);
+        frontLeftAngle.set(ControlMode.PercentOutput, .08);
     }else{
-      angleMotor.set(ControlMode.PercentOutput, -.3);
+      frontLeftAngle.set(ControlMode.PercentOutput, -.3);
       if(angle > 275)
-        angleMotor.set(ControlMode.PercentOutput, -.2);
+        frontLeftAngle.set(ControlMode.PercentOutput, -.2);
       if(angle > 315)
-        angleMotor.set(ControlMode.PercentOutput, -.08);
+        frontLeftAngle.set(ControlMode.PercentOutput, -.08);
     }
-    System.out.println(angle);
   }
 
   /**
@@ -70,6 +75,19 @@ public class Drivetrain extends SubsystemBase {
 
   public void stopWheel(TalonFX motor){
     motor.set(ControlMode.PercentOutput, 0);
+  }
+
+  public void joystickDrive(){
+    frontRightDrive.set(ControlMode.Follower, 5);
+    backLeftDrive.set(ControlMode.Follower, 5);
+    backRightDrive.set(ControlMode.Follower, 5);
+
+    frontRightAngle.set(ControlMode.Follower, 4);
+    backLeftAngle.set(ControlMode.Follower, 4);
+    backRightAngle.set(ControlMode.Follower, 4);
+
+    frontLeftDrive.set(ControlMode.PercentOutput, RobotContainer.getJoystick().getRawAxis(1));
+    frontLeftAngle.set(ControlMode.PercentOutput, RobotContainer.getJoystick().getRawAxis(5) / 2);
   }
 
   @Override

@@ -21,6 +21,7 @@ public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
   private RobotContainer m_robotContainer;
+  private Drivetrain drive;
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -30,14 +31,8 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
+    drive = new Drivetrain();
     RobotContainer.frontLeftAngle.setInverted(true);
-    RobotContainer.frontRightDrive.set(ControlMode.Follower, 5);
-    RobotContainer.backLeftDrive.set(ControlMode.Follower, 5);
-    RobotContainer.backRightDrive.set(ControlMode.Follower, 5);
-
-    RobotContainer.frontRightAngle.set(ControlMode.Follower, 4);
-    RobotContainer.backLeftAngle.set(ControlMode.Follower, 4);
-    RobotContainer.backRightAngle.set(ControlMode.Follower, 4);
   }
 
   /**
@@ -93,8 +88,7 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-    RobotContainer.frontLeftDrive.set(ControlMode.PercentOutput, RobotContainer.getJoystick().getRawAxis(1));
-    RobotContainer.frontLeftAngle.set(ControlMode.PercentOutput, RobotContainer.getJoystick().getRawAxis(4) / 2);
+    drive.joystickDrive();
   }
 
   @Override
