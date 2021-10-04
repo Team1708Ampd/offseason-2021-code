@@ -1,0 +1,9 @@
+[
+  {
+    "artifact": "frcJava (in project offseason-2021-code)",
+    "target": "roborio",
+    "debugfile": "frcJava_roborio.debugconfig",
+    "project": "offseason-2021-code",
+    "language": "java"
+  }
+]
