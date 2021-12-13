@@ -4,7 +4,9 @@
 
 package frc.robot.subsystems;
 
-import java.io.BufferedWriter;
+import java.util.*;
+import java.io.*;
+import java.nio.Buffer;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
@@ -18,9 +20,7 @@ import edu.wpi.first.wpilibj.controller.PIDController;
 
 public class Drivetrain extends SubsystemBase {
 
-  public static PIDController pid = new PIDController(1,0,0);
-
-  BufferedWriter writer = new BufferedWriter(new FileWriter(pid.txt));
+  public static PIDController pid = new PIDController(0,0,0.05);
 
   public static CANCoder frontLeftEncoder = new CANCoder(0);
   public static CANCoder frontRightEncoder = new CANCoder(3);
@@ -38,6 +38,8 @@ public class Drivetrain extends SubsystemBase {
 
   public TalonFX backRightDrive = new TalonFX(7);
   public TalonFX backRightAngle = new TalonFX(6);
+  public FileWriter fw;  
+  
 
   /** Creates a new Drivetrain. */
   public Drivetrain() {}
@@ -48,38 +50,73 @@ public class Drivetrain extends SubsystemBase {
  * @param angleMotor - TalonFX passed in for the wheel we are currently resetting
  * @param encoder - angle of the wheel we are resetting
  */
-
-  public void pidDrive(){
-    pid.setSetpoint(180);
-    if(!pid.atSetpoint()){
-    RobotContainer.frontLeftAngle.set(ControlMode.PercentOutput, pid.calculate(RobotContainer.frontLeftEncoder.getAbsolutePosition(), 180));
-    }else{
-      RobotContainer.frontLeftAngle.set(ControlMode.PercentOutput, 0);
+/*
+  public void pidLoop() {
+    for(double p = 0.05; p <= 1; p += 0.05){
+      pid.setP(p);
+      for(double d = 0.0; d <= 1; d += 0.05){
+        pid.setD(d);
+        System.out.println(pid.getP()+ " " + pid.getD());
+        pidDrive();
+        System.out.println("at 90");
+        try{
+          Thread.sleep(3000);
+        }catch(Exception e){
+          System.out.println("Interrupted");
+        }
+       // resetWheel();
+      
+        System.out.println("Reset finished " + frontLeftEncoder.getAbsolutePosition());
+        try{
+          Thread.sleep(3000);
+        }catch(Exception e){
+          System.out.println("Interrupted");
+        }
+      }
+    }
+  }
+*/
+  public void pidDrive(double p, double d){
+      try{
+        pid.setP(p);
+        pid.setD(d);
+        fw = new FileWriter("C:\\Users\\dault\\Desktop\\Swerve\\offseason-2021-code\\src\\main\\java\\frc\\robot\\subsystems\\output.txt", true);
+        fw.write(pid.getP() + " " + pid.getD());
+        pid.setSetpoint(90);
+        long startTime = System.nanoTime();
+        while(!pid.atSetpoint()){ 
+        //pidWriter.write(String.valueOf(frontLeftEncoder.getAbsolutePosition()));
+          frontLeftAngle.set(ControlMode.PercentOutput, pid.calculate(frontLeftEncoder.getAbsolutePosition(), 90));
+       // System.out.println(pid.calculate(frontLeftEncoder.getAbsolutePosition(), 90) + " : " + frontLeftEncoder.getAbsolutePosition());
+        }
+        long endTime = System.nanoTime();
+        long duration = endTime - startTime;
+        fw.write(String.valueOf(duration));
+        fw.write(System.getProperty( "line.separator" ));
+        fw.flush();
+        fw.close();
+     // pidWriter.write(String.valueOf(frontLeftEncoder.getAbsolutePosition()));
+      }catch(Exception e){
+        System.out.println("Issue writing to file");
     }
   }
 
-
   public void resetWheel(){
-    double angle = frontLeftEncoder.getAbsolutePosition();
     frontRightAngle.set(ControlMode.Follower, 4);
     backLeftAngle.set(ControlMode.Follower, 4);
     backRightAngle.set(ControlMode.Follower, 4);
-    
-    if(angle < 180){
-      frontLeftAngle.set(ControlMode.PercentOutput, .3);
-      if(angle < 90)
-        frontLeftAngle.set(ControlMode.PercentOutput, .2);
-      if(angle < 45)
-        frontLeftAngle.set(ControlMode.PercentOutput, .08);
-    }else{
-      frontLeftAngle.set(ControlMode.PercentOutput, -.3);
-      if(angle > 275)
-        frontLeftAngle.set(ControlMode.PercentOutput, -.2);
-      if(angle > 315)
-        frontLeftAngle.set(ControlMode.PercentOutput, -.08);
-    }
-  }
 
+    while(frontLeftEncoder.getAbsolutePosition() < 359){
+      if(frontLeftEncoder.getAbsolutePosition() < 180){
+        frontLeftAngle.set(ControlMode.PercentOutput, .3);
+      }else if(frontLeftEncoder.getAbsolutePosition() < 270){
+        frontLeftAngle.set(ControlMode.PercentOutput, 0.2);
+      }else if(frontLeftEncoder.getAbsolutePosition() < 315){
+        frontLeftAngle.set(ControlMode.PercentOutput, 0.08);
+      }
+    }
+    frontLeftAngle.set(ControlMode.PercentOutput, 0);
+  }
   /**
    * Returns whether or not the current wheel is is at 180 or 0/360 (or at least within a range of a few degrees set in this command)
    * @param encoder - gives angle of the wheel we are resetting

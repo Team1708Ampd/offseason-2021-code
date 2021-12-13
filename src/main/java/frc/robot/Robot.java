@@ -4,7 +4,11 @@
 
 package frc.robot;
 
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+
 import com.ctre.phoenix.motorcontrol.ControlMode;
+
 
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -53,7 +57,7 @@ public class Robot extends TimedRobot {
 
   /** This function is called once each time the robot enters Disabled mode. */
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {} 
 
   @Override
   public void disabledPeriodic() {
@@ -83,13 +87,14 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
-    Drivetrain.pid.setTolerance(1);
+    //drive.pidDrive(0, .05);
+    drive.resetWheel();
   }
 
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-    drive.pidDrive();
+   
   }
 
   @Override
