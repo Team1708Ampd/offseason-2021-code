@@ -16,11 +16,13 @@ import com.ctre.phoenix.sensors.CANCoder;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
 import frc.robot.RobotContainer;
-import edu.wpi.first.wpilibj.controller.PIDController;
+import edu.wpi.first.wpilibj.controller.ProfiledPIDController;
+import edu.wpi.first.wpilibj.trajectory.TrapezoidProfile;
 
 public class Drivetrain extends SubsystemBase {
 
-  public static PIDController pid = new PIDController(0,0,0.05);
+  public final TrapezoidProfile.Constraints m_constraints = new TrapezoidProfile.Constraints(0.1, 0.1);
+  public ProfiledPIDController pid = new ProfiledPIDController(0.5, 0.0, 0.7, m_constraints, .02);
 
   public static CANCoder frontLeftEncoder = new CANCoder(0);
   public static CANCoder frontRightEncoder = new CANCoder(3);
@@ -77,34 +79,22 @@ public class Drivetrain extends SubsystemBase {
   }
 */
   public void pidDrive(double p, double d){
-      try{
-        pid.setP(p);
-        pid.setD(d);
-        fw = new FileWriter("C:\\Users\\dault\\Desktop\\Swerve\\offseason-2021-code\\src\\main\\java\\frc\\robot\\subsystems\\output.txt", true);
-        fw.write(pid.getP() + " " + pid.getD());
-        pid.setSetpoint(90);
-        long startTime = System.nanoTime();
-        while(!pid.atSetpoint()){ 
-        //pidWriter.write(String.valueOf(frontLeftEncoder.getAbsolutePosition()));
-          frontLeftAngle.set(ControlMode.PercentOutput, pid.calculate(frontLeftEncoder.getAbsolutePosition(), 90));
-       // System.out.println(pid.calculate(frontLeftEncoder.getAbsolutePosition(), 90) + " : " + frontLeftEncoder.getAbsolutePosition());
-        }
-        long endTime = System.nanoTime();
-        long duration = endTime - startTime;
-        fw.write(String.valueOf(duration));
-        fw.write(System.getProperty( "line.separator" ));
-        fw.flush();
-        fw.close();
-     // pidWriter.write(String.valueOf(frontLeftEncoder.getAbsolutePosition()));
-      }catch(Exception e){
-        System.out.println("Issue writing to file");
-    }
+     pid.setP(p);
+     pid.setD(d);
+     pid.setTolerance(4);
+     pid.setGoal(90);
+     while(!pid.atGoal()){
+      frontLeftAngle.set(ControlMode.PercentOutput, pid.calculate(frontLeftEncoder.getAbsolutePosition()));
+     }
+     frontLeftAngle.set(ControlMode.PercentOutput, 0);
   }
 
   public void resetWheel(){
+    /*
     frontRightAngle.set(ControlMode.Follower, 4);
     backLeftAngle.set(ControlMode.Follower, 4);
     backRightAngle.set(ControlMode.Follower, 4);
+    */
 
     while(frontLeftEncoder.getAbsolutePosition() < 359){
       if(frontLeftEncoder.getAbsolutePosition() < 180){
